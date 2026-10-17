@@ -27,3 +27,25 @@ Have a look at [CONTRIBUTING](CONTRIBUTING.md) and our [documentation on project
 ## Licensing
 
 Unless otherwise noted, everything in this repository is covered by the Apache License, Version 2.0 (see [LICENSE](https://github.com/lowRISC/opentitan/blob/master/LICENSE) for full text).
+
+## Simulating with iSim
+
+[iSim](https://tn-si.com) (True North Silicon) runs this design through FuseSoC
+with its `.core` files untouched. FuseSoC selects a simulator through
+**edalize**; iSim's backend is `isimtn` (edalize's own `isim` is the Xilinx ISE
+Simulator) and lives in True North Silicon's edalize fork. Two installs, in this
+order, into the Python environment your `fusesoc` runs from:
+
+    pip install fusesoc
+    pip install --no-deps --force-reinstall git+https://github.com/Datum-Technology-Corporation/edalize.git
+
+(the second replaces the edalize FuseSoC pulled in with the fork; `--no-deps`
+keeps fusesoc's own pin satisfied). `isim`, `isim-vlog`, `isim-vcom` and
+`isim-elab` must be on `PATH`.
+
+Then, from this checkout, for a single IP:
+
+    fusesoc --cores-root . run --tool=isimtn --mapping=lowrisc:prim_generic:all:0.1 --setup --build lowrisc:ip:hmac
+
+The mapping is required: the `prim` library is virtual, and without it FuseSoC
+binds an implementation at random (ASAP7, Xilinx, ...).
