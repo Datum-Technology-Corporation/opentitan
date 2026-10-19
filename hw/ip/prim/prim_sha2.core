@@ -9,6 +9,7 @@ filesets:
   files_rtl:
     depend:
       - lowrisc:prim:sha2_pkg
+      - lowrisc:prim:assert
     files:
       - rtl/prim_sha2_pad.sv
       - rtl/prim_sha2.sv
