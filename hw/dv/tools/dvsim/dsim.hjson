@@ -22,9 +22,9 @@
                // List multiple tops for the simulation. Prepend each top level with `-top`.
                "{eval_cmd} echo {sim_tops} | sed -E 's/(\\S+)/-top \\1/g'",
                "+incdir+{build_dir}",
-               // TODO Remove buggy optimization when dsim fixes bug
-               // https://gitlab.metrics.ca/google/google/-/issues/242.
-               "-noopt-task-func",
+               // -noopt-task-func (a workaround for a dsim bug, metrics issue 242)
+               // is gone from dsim 2026: "Invalid command-line option".  Only
+               // -noopt and -noopt-comb-shadow remain, and neither is wanted.
                // Suppress following DSim errors and warnings:
                //   EnumMustBePositive - UVM 1.2 violates this
                "-suppress EnumMustBePositive"]
