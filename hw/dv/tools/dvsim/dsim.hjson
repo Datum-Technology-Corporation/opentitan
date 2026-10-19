@@ -98,6 +98,15 @@
 
   build_modes: [
     {
+      // common_modes.hjson's `gui_debug` enables `{tool}_gui_debug`; this config
+      // named it `dsim_gui`, so EVERY dvsim run with -t dsim stopped at
+      // "Sub mode dsim_gui_debug ... was not found" (dvsim 1.34.1).
+      name: dsim_gui_debug
+      is_sim_mode: 1
+      build_opts: []
+      run_opts: []
+    }
+    {
       name: dsim_gui
       is_sim_mode: 1
       build_opts: []
