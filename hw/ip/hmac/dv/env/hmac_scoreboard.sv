@@ -351,7 +351,7 @@ task hmac_scoreboard::process_tl_access(tl_seq_item item, tl_channels_e channel,
           // `exp_digest` with the prediction.
           int digest_idx = get_digest_index(csr_name);
           if (`gmv(ral.cfg.digest_swap)) begin
-            exp_digest[digest_idx] = {<<8{`gmv(csr)}};
+            exp_digest[digest_idx] = {<<8{TL_DW'(`gmv(csr))}};
           end else begin
             exp_digest[digest_idx] = `gmv(csr);
           end
