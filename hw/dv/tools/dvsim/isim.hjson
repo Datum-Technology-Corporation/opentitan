@@ -1,0 +1,105 @@
+// Copyright lowRISC contributors (OpenTitan project).
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+//
+// iSim (True North Silicon).  The build compiles the DPI C sources of the
+// FuseSoC file list into one shared object and builds the image without
+// running it (isim_build.sh); the run executes that image.  UVM 1.2 is
+// iSim's shipped, pre-compiled library (-uvm).
+{
+  build_cmd:  "{job_prefix} {proj_root}/hw/dv/tools/dvsim/isim_build.sh {build_dir}"
+  run_cmd:    "{job_prefix} isim"
+
+  build_opts: ["-c",
+               "-work {build_dir}/isim_work",
+               "-o image",
+               "-uvm 1.2",
+               "-timescale 1ns/1ps",
+               "-f {sv_flist}",
+               // List multiple tops for the simulation. Prepend each top level with `-top`.
+               "{eval_cmd} echo {sim_tops} | sed -E 's/(\\S+)/-top \\1/g'",
+               "+incdir+{build_dir}"]
+
+  run_opts:   ["-image {build_dir}/isim_work/image.so",
+               "+sv_lib={build_dir}/isim_dpi.so",
+               "-sv_seed {seed}",
+               "+UVM_TESTNAME={uvm_test}",
+               "+UVM_TEST_SEQ={uvm_test_seq}"]
+
+  // Supported wave dumping formats (in order of preference).
+  supported_wave_formats: ["fst", "vcd"]
+
+  // Default tcl script used when running the sim. Override if needed.
+  run_script: ""
+
+  // Coverage is not configured for iSim here.  Every directory below must
+  // still be a real path under the scratch area: dvsim removes the coverage
+  // database directories before each job whether or not coverage is enabled,
+  // and an EMPTY path is removed as `.` -- the job's working directory.
+  cov_db_dir: "{scratch_path}/coverage/{build_mode}.isim"
+  cov_db_test_dir_name: "{run_dir_name}.{seed}"
+  cov_db_test_dir: "{cov_db_dir}/{cov_db_test_dir_name}"
+  cov_merge_dir: "{scratch_path}/cov_merge"
+  cov_merge_db_dir: "{cov_merge_dir}/merged.isim"
+  cov_merge_cmd: ""
+  cov_merge_opts: []
+  cov_report_dir: "{scratch_path}/cov_report"
+  cov_report_cmd: ""
+  cov_report_opts: []
+  cov_report_txt: "{cov_report_dir}/cov_report.txt"
+  cov_report_page: "index.html"
+  cov_analyze_dir: "{scratch_path}/cov_analyze"
+  cov_analyze_cmd: ""
+  cov_analyze_opts: []
+  cov_metrics: ""
+
+  // pass and fail patterns
+  build_fail_patterns: ["^=E:", "^=F:"]
+  run_fail_patterns:   ["^=E:", "^=F:"]
+
+  build_modes: [
+    {
+      name: isim_gui
+      is_sim_mode: 1
+      build_opts: []
+      run_opts: []
+    }
+    {
+      name: isim_gui_debug
+      is_sim_mode: 1
+      build_opts: []
+      run_opts: []
+    }
+    {
+      name: isim_waves
+      is_sim_mode: 1
+      build_opts: []
+      run_opts:   ["-wave waves.{waves}"]
+    }
+    {
+      name: isim_waves_off
+      is_sim_mode: 1
+      build_opts: []
+    }
+    {
+      name: isim_cov
+      is_sim_mode: 1
+      build_opts: []
+      run_opts:   []
+    }
+    {
+      name: isim_xprop
+      is_sim_mode: 1
+    }
+    {
+      name: isim_profile
+      is_sim_mode: 1
+    }
+    {
+      name: isim_loopdetect
+      is_sim_mode: 1
+      build_opts: []
+      run_opts:   []
+    }
+  ]
+}
