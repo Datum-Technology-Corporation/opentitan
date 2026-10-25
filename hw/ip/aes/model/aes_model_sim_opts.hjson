@@ -17,5 +17,13 @@
       name: xcelium_aes_model_build_opts
       build_opts: ["-I{build_dir}/fusesoc-work/src/{aes_model_src_dir}", "-lcrypto"]
     }
+
+    // iSim: hw/dv/tools/dvsim/isim_build.sh compiles the DPI C sources itself
+    // and hands every `-ccflag <flag>` pair to that C compile.
+    {
+      name: isim_aes_model_build_opts
+      build_opts: ["-ccflag -I{build_dir}/fusesoc-work/src/{aes_model_src_dir}",
+                   "-ccflag -lcrypto"]
+    }
   ]
 }
