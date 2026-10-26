@@ -15,16 +15,26 @@
 #     <build_dir>/isim_dpi.so, which the run step loads with +sv_lib=;
 #   * the rest becomes <build_dir>/isim_sv.f, handed to `isim -c`.
 #
+# `-ccflag <flag>` among the arguments goes to that C compile (include
+# directories, libraries a block's C model needs), never to isim.
+#
 # Run from the file list's own directory (sim.mk does: `cd {sv_flist_gen_dir}`),
 # so relative entries resolve exactly as FuseSoC wrote them.
 set -euo pipefail
 
 build_dir="$1"; shift
 args=()
+cc_extra=()
 flist=""
 while [ $# -gt 0 ]; do
   if [ "$1" = "-f" ] && [ $# -ge 2 ]; then
     flist="$2"; shift 2
+    continue
+  fi
+  # `-ccflag <flag>`: for the DPI C compile, not for isim (a block's
+  # <tool>_..._build_opts mode, e.g. aes_model_sim_opts.hjson's -lcrypto).
+  if [ "$1" = "-ccflag" ] && [ $# -ge 2 ]; then
+    cc_extra+=("$2"); shift 2
     continue
   fi
   args+=("$1"); shift
@@ -53,7 +63,7 @@ done < "$flist"
 if [ ${#c_srcs[@]} -gt 0 ]; then
   cc="${CC:-cc}"
   echo "isim_build.sh: compiling ${#c_srcs[@]} DPI C source(s) into $build_dir/isim_dpi.so"
-  "$cc" -shared -fPIC -O2 "${c_incs[@]}" -o "$build_dir/isim_dpi.so" "${c_srcs[@]}"
+  "$cc" -shared -fPIC -O2 "${c_incs[@]}" -o "$build_dir/isim_dpi.so" "${c_srcs[@]}" ${cc_extra[@]+"${cc_extra[@]}"}
 else
   # An empty library keeps the run step's +sv_lib= unconditional.
   "${CC:-cc}" -shared -fPIC -o "$build_dir/isim_dpi.so" -x c /dev/null
